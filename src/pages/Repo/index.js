@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Container, Owner, Loading, BackButton, IssuesList } from './styles';
+import { Container, Owner, Loading, BackButton, IssuesList, PageActions } from './styles';
 import api from '../../services/api';
 import { FaArrowLeft } from 'react-icons/fa';
 
@@ -7,6 +7,7 @@ export default function Repo({ match }) {
   const [repo, setRepo] = useState({});
   const [issues, setIssues] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [page, setPage] = useState(1);
 
   useEffect(() => {
     async function load() {
@@ -30,6 +31,28 @@ export default function Repo({ match }) {
     load();
   }, [match.params.repo]);
 
+  useEffect(() => {
+    async function loadIssue() {
+      const nomeRepo = decodeURIComponent(match.params.repo);
+
+      const response = await api.get(`/repos/${nomeRepo}/issues`, {
+        params: {
+          state: 'open',
+          page,
+          per_page: 5,
+        }
+      });
+
+      setIssues(response.data);
+    }
+
+    loadIssue();
+  }, [page, match.params.repo]);
+
+  function handlePage(action) {
+    setPage(action === 'previous' ? page - 1 : page + 1);
+  }
+
   if (loading) {
     return (
       <Loading>
@@ -43,7 +66,7 @@ export default function Repo({ match }) {
       <BackButton to="/">
         <FaArrowLeft color="#0D2636" size={35} />
       </BackButton>
-      
+
       <Owner>
         <img src={repo.owner.avatar_url} alt={repo.owner.login} />
         <h1>{repo.name}</h1>
@@ -72,6 +95,15 @@ export default function Repo({ match }) {
           </li>
         ))}
       </IssuesList>
+
+      <PageActions>
+        <button type="button" onClick={() => handlePage('previous')} disabled={page < 2} >
+          Previous
+        </button>
+        <button type="button" onClick={() => handlePage('next')}>
+          Next
+        </button>
+      </PageActions>
     </Container>
   );
 }
