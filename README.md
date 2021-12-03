@@ -5,3 +5,4 @@
 2. styled-components
 3. react-icons
 4. axios
+5. react-toastify
