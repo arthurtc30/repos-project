@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Container, Owner, Loading, BackButton, IssuesList, PageActions } from './styles';
+import { Container, Owner, Loading, BackButton, IssuesList, PageActions, FilterList } from './styles';
 import api from '../../services/api';
 import { FaArrowLeft } from 'react-icons/fa';
 
@@ -8,6 +8,11 @@ export default function Repo({ match }) {
   const [issues, setIssues] = useState([]);
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
+  const [filters, setFilters] = useState([
+    {state: 'all', label: 'All', active: true},
+    {state: 'open', label: 'Open', active: false},
+    {state: 'closed', label: 'Closed', active: false},
+  ])
 
   useEffect(() => {
     async function load() {
@@ -72,6 +77,14 @@ export default function Repo({ match }) {
         <h1>{repo.name}</h1>
         <p>{repo.description}</p>
       </Owner>
+
+      <FilterList>
+        {filters.map((filter, index) => (
+          <button type="button" key={filter.label} onClick={() => {}} >
+            {filter.label}
+          </button>
+        ))}
+      </FilterList>
 
       <IssuesList>
         {issues.map(issue => (
