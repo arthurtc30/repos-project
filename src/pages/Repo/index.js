@@ -12,7 +12,8 @@ export default function Repo({ match }) {
     {state: 'all', label: 'All', active: true},
     {state: 'open', label: 'Open', active: false},
     {state: 'closed', label: 'Closed', active: false},
-  ])
+  ]);
+  const [filterIndex, setFilterindex] = useState(0);
 
   useEffect(() => {
     async function load() {
@@ -22,7 +23,7 @@ export default function Repo({ match }) {
         api.get(`/repos/${nomeRepo}`),
         api.get(`/repos/${nomeRepo}/issues`, {
           params: {
-            state: 'open',
+            state: filters.find(f => f.active).state,
             per_page: 5,
           }
         }),
@@ -42,7 +43,7 @@ export default function Repo({ match }) {
 
       const response = await api.get(`/repos/${nomeRepo}/issues`, {
         params: {
-          state: 'open',
+          state: filters[filterIndex].state,
           page,
           per_page: 5,
         }
@@ -52,7 +53,11 @@ export default function Repo({ match }) {
     }
 
     loadIssue();
-  }, [page, match.params.repo]);
+  }, [page, match.params.repo, filters, filterIndex]);
+
+  function handleFilter(index) {
+    setFilterindex(index);
+  }
 
   function handlePage(action) {
     setPage(action === 'previous' ? page - 1 : page + 1);
@@ -78,9 +83,9 @@ export default function Repo({ match }) {
         <p>{repo.description}</p>
       </Owner>
 
-      <FilterList>
+      <FilterList active={filterIndex} >
         {filters.map((filter, index) => (
-          <button type="button" key={filter.label} onClick={() => {}} >
+          <button type="button" key={filter.label} onClick={() => handleFilter(index)} >
             {filter.label}
           </button>
         ))}
